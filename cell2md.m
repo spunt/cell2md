@@ -1,7 +1,7 @@
 function cell2md(X, varargin)
 % CELL2MD Save a cell array as a markdown table
 % 
-%  USAGE: varargout = cell2md(X, varargin)
+%  USAGE: cell2md(X, varargin)
 % __________________________________________________________________________
 %  INPUTS
 %   X:              cell array to write (can be numeric or char array, in 
