@@ -23,6 +23,8 @@ function cell2md(X, varargin)
 % 	Created:  2015-06-11
 % 	Email:    spunt@caltech.edu
 % __________________________________________________________________________
+
+% | Default VARARGIN
 defaults = {
             'outfile',         fullfile(pwd, ['cell2md_' datestr(now, 'YYYY-mm-DD') '.md']) ,            ...
             'hdrnames',        [],            ...
@@ -30,15 +32,29 @@ defaults = {
             };
 vals = setargs(defaults, varargin);
 if nargin==0, mfile_showhelp; fprintf('\t= DEFAULT VARARGIN =\n'); disp(vals); return; end
+
+% | Check X
 if ~iscell(X)
-  if ischar(X) 
-    X = cellstr(X); 
-  elseif isnumeric(X) 
-    X = cellfun(@num2str, num2cell(X), 'Unif', false); 
-  end
+    fprintf('| WARNING: Input is not a cell array and will be converted to cell. Check output carefully.\n'); 
+    if ischar(X) 
+        X = cellstr(X); 
+    elseif isnumeric(X) 
+        X = cellfun(@num2str, num2cell(X), 'Unif', false); 
+    end
+else
+    cellclass = cellfun(@class, X, 'Unif', false);
+    notchar = ~strcmpi(cellclass, 'char'); 
+    if any(notchar(:))
+        fprintf('| WARNING: Some cells do not contain CHAR data and will be converted to CHAR. Check output carefully.\n');
+        try
+            X(notchar) = cellfun(@num2str, X(notchar), 'Unif', false); 
+        catch
+           fprintf('| ERROR: Could not converted some cells to CHAR. Exiting.\n'); return;  
+        end
+    end
 end
 
-  % | Check HDRNAMES
+% | Check HDRNAMES
 if isempty(hdrnames)
   hdrnames = X(1,:);
   X(1,:) = [];
@@ -86,6 +102,7 @@ for r = 2:size(mdcell, 1)
   fprintf(fid, '\n%s', horzcat(mdcell{r, :})); 
 end
 fclose(fid);
+fprintf('| OUTPUT: %s\n', outfile); 
 
 end
 % ==========================================================================
