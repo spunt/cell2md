@@ -1,4 +1,4 @@
-function cell2md(X, varargin)
+function varargout = cell2md(X, varargin)
 % CELL2MD Save a cell array as a markdown table
 % 
 %  USAGE: cell2md(X, varargin)
@@ -28,7 +28,8 @@ function cell2md(X, varargin)
 defaults = {
             'outfile',         fullfile(pwd, ['cell2md_' datestr(now, 'YYYY-mm-DD') '.md']) ,            ...
             'hdrnames',        [],            ...
-            'alignment',       'center',              ... 
+            'alignment',       'center',              ...
+            'dispoutput',         true            ...
             };
 vals = setargs(defaults, varargin);
 if nargin==0, mfile_showhelp; fprintf('\t= DEFAULT VARARGIN =\n'); disp(vals); return; end
@@ -94,13 +95,17 @@ for i = 1:length(colpos)
     mdcell{ii + 2, colpos(i)} = [X{ii, i} repmat(' ', 1, wspace(ii+1,i))];
   end
 end
+if nargout>0, varargout{1} = mdcell; end
 
 % | Write to file
+if ~dispoutput
+    fprintf('%s', horzcat(mdcell{1, :})); 
+    for r = 2:size(mdcell, 1), fprintf('\n%s', horzcat(mdcell{r, :})); end
+end
+
 fid = fopen(outfile, 'w');
 fprintf(fid, '%s', horzcat(mdcell{1, :})); 
-for r = 2:size(mdcell, 1)
-  fprintf(fid, '\n%s', horzcat(mdcell{r, :})); 
-end
+for r = 2:size(mdcell, 1), fprintf(fid, '\n%s', horzcat(mdcell{r, :})); end
 fclose(fid);
 fprintf('| OUTPUT: %s\n', outfile); 
 
